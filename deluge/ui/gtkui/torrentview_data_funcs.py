@@ -12,20 +12,20 @@ from __future__ import print_function
 import warnings
 from functools import partial
 
-import gtk
-from gobject import GError
+from gi.repository.GdkPixbuf import Colorspace, Pixbuf
+from gi.repository.GObject import GError
 
 import deluge.common as common
 import deluge.component as component
 
 # Status icons.. Create them from file only once to avoid constantly
 # re-creating them.
-icon_downloading = gtk.gdk.pixbuf_new_from_file(common.get_pixmap('downloading16.png'))
-icon_seeding = gtk.gdk.pixbuf_new_from_file(common.get_pixmap('seeding16.png'))
-icon_inactive = gtk.gdk.pixbuf_new_from_file(common.get_pixmap('inactive16.png'))
-icon_alert = gtk.gdk.pixbuf_new_from_file(common.get_pixmap('alert16.png'))
-icon_queued = gtk.gdk.pixbuf_new_from_file(common.get_pixmap('queued16.png'))
-icon_checking = gtk.gdk.pixbuf_new_from_file(common.get_pixmap('checking16.png'))
+icon_downloading = Pixbuf.new_from_file(common.get_pixmap('downloading16.png'))
+icon_seeding = Pixbuf.new_from_file(common.get_pixmap('seeding16.png'))
+icon_inactive = Pixbuf.new_from_file(common.get_pixmap('inactive16.png'))
+icon_alert = Pixbuf.new_from_file(common.get_pixmap('alert16.png'))
+icon_queued = Pixbuf.new_from_file(common.get_pixmap('queued16.png'))
+icon_checking = Pixbuf.new_from_file(common.get_pixmap('checking16.png'))
 
 # Holds the info for which status icon to display based on TORRENT_STATE
 ICON_STATE = {
@@ -85,9 +85,7 @@ def cell_data_statusicon(column, cell, model, row, data):
 
 
 def create_blank_pixbuf():
-    i = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8, 16, 16)
-    i.fill(0x00000000)
-    return i
+    return Pixbuf.new(Colorspace.RGB, True, 8, 16, 16)
 
 
 def set_icon(icon, cell):
@@ -95,7 +93,7 @@ def set_icon(icon, cell):
         pixbuf = icon.get_cached_icon()
         if pixbuf is None:
             try:
-                pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(icon.get_filename(), 16, 16)
+                pixbuf = Pixbuf.new_from_file_at_size(icon.get_filename(), 16, 16)
             except GError:
                 # Failed to load the pixbuf (Bad image file), so set a blank pixbuf
                 pixbuf = create_blank_pixbuf()

@@ -15,19 +15,19 @@ import signal
 import sys
 import time
 
-import pygtk  # isort:skip (Required before gtk import).
-pygtk.require('2.0')  # NOQA: E402
+import gi  # isort:skip (Required before Gtk import).
+gi.require_version('Gtk', '3.0')  # NOQA: E402
 
 # isort:imports-thirdparty
-import gtk
-from gobject import set_prgname
-from twisted.internet import defer, gtk2reactor
+from gi.repository import Gdk, Gtk
+from gi.repository.GObject import set_prgname
+from twisted.internet import defer, gtk3reactor
 from twisted.internet.error import ReactorAlreadyInstalledError
 from twisted.internet.task import LoopingCall
 
 try:
     # Install twisted reactor, before any other modules import reactor.
-    reactor = gtk2reactor.install()
+    reactor = gtk3reactor.install()
 except ReactorAlreadyInstalledError as ex:
     # Running unit tests so trial already installed a rector
     from twisted.internet import reactor
@@ -149,7 +149,7 @@ class GtkUI(object):
             SetConsoleCtrlHandler(on_die, True)
             log.debug("Win32 'die' handler registered")
         elif deluge.common.osx_check():
-            if gtk.gdk.WINDOWING == 'quartz':
+            if Gdk.WINDOWING == 'quartz':
                 import gtkosx_application
                 self.osxapp = gtkosx_application.gtkosx_application_get()
                 self.osxapp.connect('NSApplicationWillTerminate', on_die)
@@ -201,7 +201,7 @@ class GtkUI(object):
         self.statusbar = StatusBar()
         self.addtorrentdialog = AddTorrentDialog()
 
-        if deluge.common.osx_check() and gtk.gdk.WINDOWING == 'quartz':
+        if deluge.common.osx_check() and Gdk.WINDOWING == 'quartz':
             def nsapp_open_file(osxapp, filename):
                 # Ignore command name which is raised at app launch (python opening main script).
                 if filename == sys.argv[0]:
@@ -294,7 +294,7 @@ class GtkUI(object):
 
         if self.config['standalone']:
             def on_dialog_response(response):
-                if response != gtk.RESPONSE_YES:
+                if response != Gtk.ResponseType.YES:
                     # The user does not want to turn Standalone Mode off, so just quit
                     self.mainwindow.quit()
                     return
@@ -397,7 +397,7 @@ class GtkUI(object):
                             dialog = AuthenticationDialog(reason.value.message, reason.value.username)
 
                             def dialog_finished(response_id, host, port):
-                                if response_id == gtk.RESPONSE_OK:
+                                if response_id == Gtk.ResponseType.OK:
                                     reactor.callLater(
                                         0.5, do_connect, try_counter - 1,
                                         host, port, dialog.get_username(),

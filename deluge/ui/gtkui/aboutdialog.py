@@ -7,7 +7,7 @@
 # See LICENSE for more details.
 #
 
-import gtk
+from gi.repository import GdkPixbuf, Gtk
 
 import deluge.component as component
 from deluge.common import get_pixmap, get_version
@@ -17,9 +17,9 @@ from deluge.ui.gtkui.common import get_deluge_icon
 
 class AboutDialog(object):
     def __init__(self):
-        self.about = gtk.AboutDialog()
+        self.about = Gtk.AboutDialog()
         self.about.set_transient_for(component.get('MainWindow').get_window())
-        self.about.set_position(gtk.WIN_POS_CENTER)
+        self.about.set_position(Gtk.WindowPosition.CENTER)
         self.about.set_name('Deluge')
         self.about.set_program_name(_('Deluge'))
 
@@ -247,7 +247,7 @@ class AboutDialog(object):
         self.about.set_website_label('deluge-torrent.org')
 
         self.about.set_icon(get_deluge_icon())
-        self.about.set_logo(gtk.gdk.pixbuf_new_from_file(get_pixmap('deluge-about.png')))
+        self.about.set_logo(GdkPixbuf.Pixbuf.new_from_file(get_pixmap('deluge-about.png')))
 
         if client.connected():
             if not client.is_standalone():

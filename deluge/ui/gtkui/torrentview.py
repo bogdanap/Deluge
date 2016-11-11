@@ -12,8 +12,8 @@
 import logging
 from locale import strcoll
 
-import gtk
-from gobject import TYPE_UINT64, idle_add
+from gi.repository import Gdk, Gtk
+from gi.repository.GObject import TYPE_UINT64, idle_add
 from twisted.internet import reactor
 
 import deluge.component as component
@@ -210,7 +210,7 @@ class SearchBox(object):
             self.search_pending = reactor.callLater(0.7, self.torrentview.update)
 
     def on_search_torrents_entry_icon_press(self, entry, icon, event):
-        if icon != gtk.ENTRY_ICON_SECONDARY:
+        if icon != Gtk.EntryIconPosition.SECONDARY:
             return
         self.clear_search()
 
@@ -706,7 +706,7 @@ class TorrentView(ListView, component.Component):
 
     # Handle keyboard shortcuts
     def on_key_press_event(self, widget, event):
-        keyname = gtk.gdk.keyval_name(event.keyval)
+        keyname = Gdk.keyval_name(event.keyval)
         if keyname is not None:
             func = getattr(self, 'keypress_' + keyname.lower(), None)
             if func:
@@ -716,7 +716,7 @@ class TorrentView(ListView, component.Component):
         log.debug('keypress_delete')
         torrents = self.get_selected_torrents()
         if torrents:
-            if event.state & gtk.gdk.SHIFT_MASK:
+            if event.get_state() & Gdk.ModifierType.SHIFT_MASK:
                 RemoveTorrentDialog(torrents, delete_files=True).run()
             else:
                 RemoveTorrentDialog(torrents).run()
