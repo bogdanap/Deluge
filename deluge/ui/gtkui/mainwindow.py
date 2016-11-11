@@ -106,7 +106,7 @@ class MainWindow(component.Component):
         self.restart = False
 
         self.window.drag_dest_set(
-            Gtk.DestDefaults.ALL, [Gtk.TargetEntry.new('text/uri-list', 0, 80)], Gdk.DragAction.COPY)
+            Gtk.DestDefaults.ALL, [Gtk.TargetEntry(target='text/uri-list', flags=0, info=80)], Gdk.DragAction.COPY)
 
         # Connect events
         self.window.connect('window-state-event', self.on_window_state_event)
