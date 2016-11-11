@@ -178,8 +178,10 @@ class GtkUI(object):
         self.queuedtorrents = QueuedTorrents()
         self.ipcinterface = IPCInterface(args.torrents)
 
-        # Initialize gdk threading
-        gtk.gdk.threads_init()
+        # FIXME: Verify that removing gdk threading has no adverse effects.
+        # There are the two commits [64a94ec] [1f3e930] that added gdk threading
+        # and my thinking is there is no need for the code anymore.
+        # gtk.gdk.threads_init()
 
         # We make sure that the UI components start once we get a core URI
         client.set_disconnect_callback(self.__on_disconnect)
