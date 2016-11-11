@@ -97,9 +97,9 @@ class FilterTreeView(component.Component):
         self.treeview.connect('button-press-event', self.on_button_press_event)
 
         # colors using current theme.
-        style = component.get('MainWindow').get_window().get_style()
-        self.colour_background = style.bg[gtk.STATE_NORMAL]
-        self.colour_foreground = style.fg[gtk.STATE_NORMAL]
+        style_ctx = component.get('MainWindow').get_window().get_style_context()
+        self.colour_background = style_ctx.get_background_color(Gtk.StateFlags.NORMAL)
+        self.colour_foreground = style_ctx.get_color(Gtk.StateFlags.NORMAL)
 
         # filtertree menu
         builder = Gtk.Builder()
@@ -248,9 +248,9 @@ class FilterTreeView(component.Component):
         return self.get_transparent_pix(16, 16)
 
     def get_transparent_pix(self, width, height):
-        pix = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8, width, height)
-        pix.fill(0x0000000)
-        return pix
+        # Should really give back a properly size pixbuf...
+        from deluge.ui.gtkui import torrentview_data_funcs as funcs
+        return funcs.icon_empty
 
     def set_row_image(self, cat, value, filename):
         pix = None
@@ -337,7 +337,7 @@ class FilterTreeView(component.Component):
             # Show the pop-up menu
             self.set_menu_sensitivity()
             self.menu.hide()
-            self.menu.popup(None, None, None, event.button, event.time)
+            self.menu.popup(None, None, None, None, event.button, event.time)
             self.menu.show()
 
             if cat == 'cat':

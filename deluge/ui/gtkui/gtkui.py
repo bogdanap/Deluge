@@ -7,6 +7,7 @@
 # See LICENSE for more details.
 #
 
+
 from __future__ import division
 
 import logging
@@ -237,11 +238,11 @@ class GtkUI(object):
         reactor.callWhenRunning(self._on_reactor_start)
 
         # Initialize gdk threading
-        gtk.gdk.threads_enter()
+        # gtk.gdk.threads_enter()
         reactor.run()
         # Reactor is not running. Any async callbacks (Deferreds) can no longer
         # be processed from this point on.
-        gtk.gdk.threads_leave()
+        # gtk.gdk.threads_leave()
 
     def shutdown(self, *args, **kwargs):
         log.debug('GTKUI shutting down...')

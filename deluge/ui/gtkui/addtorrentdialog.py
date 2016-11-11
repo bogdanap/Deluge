@@ -571,8 +571,8 @@ class AddTorrentDialog(component.Component):
         dialog.set_transient_for(self.dialog)
         entry.grab_focus()
 
-        text = (gtk.clipboard_get(selection='PRIMARY').wait_for_text() or
-                gtk.clipboard_get().wait_for_text())
+        text = (Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD).wait_for_text() or
+                Gtk.Clipboard.get().wait_for_text()).strip()
         if text:
             text = text.strip()
             if deluge.common.is_url(text) or deluge.common.is_magnet(text):
@@ -658,8 +658,8 @@ class AddTorrentDialog(component.Component):
         dialog.set_transient_for(self.dialog)
         entry.grab_focus()
 
-        text = (gtk.clipboard_get(selection='PRIMARY').wait_for_text() or
-                gtk.clipboard_get().wait_for_text()).strip()
+        text = (Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD).wait_for_text() or
+                Gtk.Clipboard.get().wait_for_text()).strip()
         if deluge.common.is_infohash(text):
             entry.set_text(text)
 

@@ -21,7 +21,7 @@ COLOR_STATES = ['missing', 'waiting', 'downloading', 'completed']
 
 class PiecesBar(Gtk.DrawingArea):
     # Draw in response to an expose-event
-    __gsignals__ = {'expose-event': 'override'}
+    __gsignals__ = {'draw': 'override'}
 
     def __init__(self):
         Gtk.DrawingArea.__init__(self)
@@ -56,7 +56,7 @@ class PiecesBar(Gtk.DrawingArea):
         self.height = size.height
 
     # Handle the expose-event by drawing
-    def do_expose_event(self, event):
+    def do_draw(self, event):
         # Create cairo context
         self.cr = self.window.cairo_create()
         self.cr.set_line_width(max(self.cr.device_to_user_distance(0.5, 0.5)))

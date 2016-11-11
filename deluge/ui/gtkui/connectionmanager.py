@@ -198,6 +198,7 @@ class ConnectionManager(component.Component):
 
         self.connection_manager.destroy()
         del self.builder
+        del self.window
         del self.connection_manager
         del self.liststore
         del self.hostlist
