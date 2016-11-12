@@ -6,7 +6,7 @@
 # the additional special exception to link portions of this program with the OpenSSL library.
 # See LICENSE for more details.
 #
-
+# pylint: disable=wrong-import-position
 
 from __future__ import division
 
@@ -20,8 +20,9 @@ import gi  # isort:skip (Required before Gtk import).
 gi.require_version('Gtk', '3.0')  # NOQA: E402
 
 # isort:imports-thirdparty
-from gi.repository import Gdk, Gtk
+from gi.repository.Gdk import WINDOWING, threads_enter, threads_init, threads_leave
 from gi.repository.GObject import set_prgname
+from gi.repository.Gtk import RESPONSE_OK, RESPONSE_YES
 from twisted.internet import defer, gtk3reactor
 from twisted.internet.error import ReactorAlreadyInstalledError
 from twisted.internet.task import LoopingCall
@@ -34,8 +35,8 @@ except ReactorAlreadyInstalledError as ex:
     from twisted.internet import reactor
 
 # isort:imports-firstparty
-import deluge.common
 import deluge.component as component
+from deluge.common import fsize, fspeed, get_default_download_dir, osx_check, windows_check
 from deluge.configmanager import ConfigManager, get_config_dir
 from deluge.error import AuthenticationRequired, BadLoginError, DaemonRunningError
 from deluge.ui.client import client
@@ -104,11 +105,11 @@ DEFAULT_PREFS = {
     'autoconnect_host_id': None,
     'autostart_localhost': False,
     'autoadd_queued': False,
-    'choose_directory_dialog_path': deluge.common.get_default_download_dir(),
+    'choose_directory_dialog_path': get_default_download_dir(),
     'show_new_releases': True,
     'ntf_tray_blink': True,
     'ntf_sound': False,
-    'ntf_sound_path': deluge.common.get_default_download_dir(),
+    'ntf_sound_path': get_default_download_dir(),
     'ntf_popup': False,
     'ntf_email': False,
     'ntf_email_add': '',
@@ -145,16 +146,15 @@ class GtkUI(object):
             log.debug("OS signal 'die' caught with args: %s", args)
             reactor.stop()
 
-        if deluge.common.windows_check():
+        if windows_check():
             from win32api import SetConsoleCtrlHandler
             SetConsoleCtrlHandler(on_die, True)
             log.debug("Win32 'die' handler registered")
-        elif deluge.common.osx_check():
-            if Gdk.WINDOWING == 'quartz':
-                import gtkosx_application
-                self.osxapp = gtkosx_application.gtkosx_application_get()
-                self.osxapp.connect('NSApplicationWillTerminate', on_die)
-                log.debug("OSX quartz 'die' handler registered")
+        elif osx_check() and WINDOWING == 'quartz':
+            import gtkosx_application
+            self.osxapp = gtkosx_application.gtkosx_application_get()
+            self.osxapp.connect('NSApplicationWillTerminate', on_die)
+            log.debug("OSX quartz 'die' handler registered")
 
         # Set process name again to fix gtk issue
         setproctitle(getproctitle())
@@ -180,7 +180,7 @@ class GtkUI(object):
         self.ipcinterface = IPCInterface(args.torrents)
 
         # For details on need for threading, see: https://wiki.gnome.org/Projects/PyGObject/Threading
-        Gdk.threads_init()
+        threads_init()
 
         # We make sure that the UI components start once we get a core URI
         client.set_disconnect_callback(self.__on_disconnect)
@@ -200,7 +200,7 @@ class GtkUI(object):
         self.statusbar = StatusBar()
         self.addtorrentdialog = AddTorrentDialog()
 
-        if deluge.common.osx_check() and Gdk.WINDOWING == 'quartz':
+        if osx_check() and WINDOWING == 'quartz':
             def nsapp_open_file(osxapp, filename):
                 # Ignore command name which is raised at app launch (python opening main script).
                 if filename == sys.argv[0]:
@@ -236,11 +236,11 @@ class GtkUI(object):
         reactor.callWhenRunning(self._on_reactor_start)
 
         # Initialize gdk threading
-        Gdk.threads_enter()
+        threads_enter()
         reactor.run()
         # Reactor is not running. Any async callbacks (Deferreds) can no longer
         # be processed from this point on.
-        Gdk.threads_leave()
+        threads_leave()
 
     def shutdown(self, *args, **kwargs):
         log.debug('GTKUI shutting down...')
@@ -282,10 +282,9 @@ class GtkUI(object):
         delta_sent = sent - self.daemon_bps[1]
         delta_recv = recv - self.daemon_bps[2]
         self.daemon_bps = (t, sent, recv)
-        sent_rate = deluge.common.fspeed(delta_sent / delta_time)
-        recv_rate = deluge.common.fspeed(delta_recv / delta_time)
-        log.debug('RPC: Sent %s (%s) Recv %s (%s)',
-                  deluge.common.fsize(sent), sent_rate, deluge.common.fsize(recv), recv_rate)
+        sent_rate = fspeed(delta_sent / delta_time)
+        recv_rate = fspeed(delta_recv / delta_time)
+        log.debug('RPC: Sent %s (%s) Recv %s (%s)', fsize(sent), sent_rate, fsize(recv), recv_rate)
 
     def _on_reactor_start(self):
         log.debug('_on_reactor_start')
@@ -293,7 +292,7 @@ class GtkUI(object):
 
         if self.config['standalone']:
             def on_dialog_response(response):
-                if response != Gtk.ResponseType.YES:
+                if response != RESPONSE_YES:
                     # The user does not want to turn Standalone Mode off, so just quit
                     self.mainwindow.quit()
                     return
@@ -396,7 +395,7 @@ class GtkUI(object):
                             dialog = AuthenticationDialog(reason.value.message, reason.value.username)
 
                             def dialog_finished(response_id, host, port):
-                                if response_id == Gtk.ResponseType.OK:
+                                if response_id == RESPONSE_OK:
                                     reactor.callLater(
                                         0.5, do_connect, try_counter - 1,
                                         host, port, dialog.get_username(),
@@ -426,7 +425,7 @@ class GtkUI(object):
                     break
 
         if self.config['show_connection_manager_on_start']:
-            if deluge.common.windows_check():
+            if windows_check():
                 # Call to simulate() required to workaround showing daemon status (see #2813)
                 reactor.simulate()
             self.connectionmanager.show()

@@ -11,13 +11,14 @@ import logging
 import os.path
 from hashlib import sha1 as sha
 
-from gi.repository import Gdk, Gtk
+from gi.repository import Gtk
+from gi.repository.Gdk import DragAction, WindowState
 from twisted.internet import reactor
 from twisted.internet.error import ReactorNotRunning
 
-import deluge.common
 import deluge.component as component
 import deluge.ui.gtkui.common
+from deluge.common import fspeed, resource_filename
 from deluge.configmanager import ConfigManager
 from deluge.ui.client import client
 from deluge.ui.gtkui.dialogs import PasswordDialog
@@ -74,27 +75,21 @@ class MainWindow(component.Component):
                                "'component.get(\"MainWindow\").connect_signals()'")
         self.main_builder.connect_signals = patched_connect_signals
 
-        # Get the gtk builder file for the main window
-        self.main_builder.add_from_file(deluge.common.resource_filename(
-            'deluge.ui.gtkui', os.path.join('glade', 'main_window.ui')))
-        # The new release dialog
-        self.main_builder.add_from_file(deluge.common.resource_filename(
-            'deluge.ui.gtkui', os.path.join('glade', 'main_window.new_release.ui')))
-        # The tabs
-        self.main_builder.add_from_file(deluge.common.resource_filename(
-            'deluge.ui.gtkui', os.path.join('glade', 'main_window.tabs.ui')))
-        # The tabs file menu
-        self.main_builder.add_from_file(deluge.common.resource_filename(
-            'deluge.ui.gtkui', os.path.join('glade', 'main_window.tabs.menu_file.ui')))
-        # The tabs peer menu
-        self.main_builder.add_from_file(deluge.common.resource_filename(
-            'deluge.ui.gtkui', os.path.join('glade', 'main_window.tabs.menu_peer.ui')))
+        # Get Gtk Builder files Main Window, New release dialog, and Tabs.
+        self.main_builder.add_from_file(resource_filename('deluge.ui.gtkui', os.path.join(
+            'glade', 'main_window.ui')))
+        self.main_builder.add_from_file(resource_filename('deluge.ui.gtkui', os.path.join(
+            'glade', 'main_window.new_release.ui')))
+        self.main_builder.add_from_file(resource_filename('deluge.ui.gtkui', os.path.join(
+            'glade', 'main_window.tabs.ui')))
+        self.main_builder.add_from_file(resource_filename('deluge.ui.gtkui', os.path.join(
+            'glade', 'main_window.tabs.menu_file.ui')))
+        self.main_builder.add_from_file(resource_filename('deluge.ui.gtkui', os.path.join(
+            'glade', 'main_window.tabs.menu_peer.ui')))
 
         self.window = self.main_builder.get_object('main_window')
-
         self.window.set_icon(deluge.ui.gtkui.common.get_deluge_icon())
         self.vpaned = self.main_builder.get_object('vpaned')
-
         self.initial_vpaned_position = self.config['window_pane_position']
 
         # Load the window state
@@ -106,7 +101,7 @@ class MainWindow(component.Component):
         self.restart = False
 
         self.window.drag_dest_set(
-            Gtk.DestDefaults.ALL, [Gtk.TargetEntry(target='text/uri-list', flags=0, info=80)], Gdk.DragAction.COPY)
+            Gtk.DestDefaults.ALL, [Gtk.TargetEntry(target='text/uri-list', flags=0, info=80)], DragAction.COPY)
 
         # Connect events
         self.window.connect('window-state-event', self.on_window_state_event)
@@ -254,14 +249,14 @@ class MainWindow(component.Component):
             self.config['window_height'] = event.height
 
     def on_window_state_event(self, widget, event):
-        if event.changed_mask & Gdk.WindowState.MAXIMIZED:
-            if event.new_window_state & Gdk.WindowState.MAXIMIZED:
+        if event.changed_mask & WindowState.MAXIMIZED:
+            if event.new_window_state & WindowState.MAXIMIZED:
                 log.debug('pos: %s', self.window.get_position())
                 self.config['window_maximized'] = True
-            elif not event.new_window_state & Gdk.WindowState.WITHDRAWN:
+            elif not event.new_window_state & WindowState.WITHDRAWN:
                 self.config['window_maximized'] = False
-        if event.changed_mask & Gdk.WindowState.ICONIFIED:
-            if event.new_window_state & Gdk.WindowState.ICONIFIED:
+        if event.changed_mask & WindowState.ICONIFIED:
+            if event.new_window_state & WindowState.ICONIFIED:
                 log.debug('MainWindow is minimized..')
                 component.pause('TorrentView')
                 component.pause('StatusBar')
@@ -304,8 +299,8 @@ class MainWindow(component.Component):
     def update(self):
         # Update the window title
         def _on_get_session_status(status):
-            download_rate = deluge.common.fspeed(status['payload_download_rate'], precision=0, shortform=True)
-            upload_rate = deluge.common.fspeed(status['payload_upload_rate'], precision=0, shortform=True)
+            download_rate = fspeed(status['payload_download_rate'], precision=0, shortform=True)
+            upload_rate = fspeed(status['payload_upload_rate'], precision=0, shortform=True)
             self.window.set_title(_('D: %s U: %s - Deluge' % (download_rate, upload_rate)))
         if self.config['show_rate_in_title']:
             client.core.get_session_status(['payload_download_rate',
@@ -333,7 +328,7 @@ class MainWindow(component.Component):
         if Wnck:
             self.screen.force_update()
             from gi.repository import GdkX11  # NOQA
-            win = Wnck.Window.get(self.window.get_window().get_xid())
+            win = Wnck.Window.get(self.get_window().get_xid())
             if win:
                 active_wksp = win.get_screen().get_active_workspace()
                 if active_wksp:

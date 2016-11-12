@@ -9,12 +9,12 @@
 
 # pylint: disable=super-on-old-class
 
-from gi.repository import GdkPixbuf, Gtk
+from gi.repository import Gtk
 from twisted.internet import defer
 
 import deluge.component as component
-from deluge.common import get_pixmap, osx_check, windows_check
-from deluge.ui.gtkui.common import get_deluge_icon
+from deluge.common import windows_check
+from deluge.ui.gtkui.common import get_deluge_icon, get_pixbuf_at_size
 
 
 class BaseDialog(Gtk.Dialog):
@@ -48,10 +48,9 @@ class BaseDialog(Gtk.Dialog):
         image = Gtk.Image()
         if not Gtk.stock_lookup(icon) and (icon.endswith('.svg') or icon.endswith('.png')):
             # Hack for Windows since it doesn't support svg
-            if icon.endswith('.svg') and (windows_check() or osx_check()):
+            if icon.endswith('.svg') and windows_check():
                 icon = icon.rpartition('.svg')[0] + '16.png'
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(get_pixmap(icon), 32, 32)
-            image.set_from_pixbuf(pixbuf)
+            image.set_from_pixbuf(get_pixbuf_at_size(icon, 32))
         else:
             image.set_from_stock(icon, Gtk.IconSize.DIALOG)
         image.set_alignment(0.5, 0.0)

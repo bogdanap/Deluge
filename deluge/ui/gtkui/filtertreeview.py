@@ -13,13 +13,15 @@ import logging
 import os
 import warnings
 
-from gi.repository import GdkPixbuf, Gtk, Pango
-from gi.repository.GObject import GError
+from gi.repository import Gtk
+from gi.repository.GdkPixbuf import Pixbuf
+from gi.repository.Pango import EllipsizeMode
 
 import deluge.component as component
-from deluge.common import TORRENT_STATE, get_pixmap, resource_filename
+from deluge.common import TORRENT_STATE, resource_filename
 from deluge.configmanager import ConfigManager
 from deluge.ui.client import client
+from deluge.ui.gtkui.common import get_pixbuf, get_pixbuf_at_size
 
 log = logging.getLogger(__name__)
 
@@ -60,7 +62,7 @@ class FilterTreeView(component.Component):
 
         # Create the treestore
         # cat, value, label, count, pixmap, visible
-        self.treestore = Gtk.TreeStore(str, str, str, int, GdkPixbuf.Pixbuf, bool)
+        self.treestore = Gtk.TreeStore(str, str, str, int, Pixbuf, bool)
 
         # Create the column and cells
         column = Gtk.TreeViewColumn('Filters')
@@ -71,7 +73,7 @@ class FilterTreeView(component.Component):
         column.add_attribute(self.cell_pix, 'pixbuf', 4)
         # label cell
         cell_label = Gtk.CellRendererText()
-        cell_label.set_property('ellipsize', Pango.EllipsizeMode.END)
+        cell_label.set_property('ellipsize', EllipsizeMode.END)
         column.pack_start(cell_label, expand=True)
         column.set_cell_data_func(cell_label, self.render_cell_data, None)
         # count cell
@@ -241,26 +243,10 @@ class FilterTreeView(component.Component):
             pix = TRACKER_PIX.get(value, None)
 
         if pix:
-            try:
-                return GdkPixbuf.Pixbuf.new_from_file(get_pixmap('%s16.png' % pix))
-            except GError as ex:
-                log.warning(ex)
-        return self.get_transparent_pix(16, 16)
-
-    def get_transparent_pix(self, width, height):
-        # Should really give back a properly size pixbuf...
-        from deluge.ui.gtkui import torrentview_data_funcs as funcs
-        return funcs.icon_empty
+            return get_pixbuf('%s16.png' % pix)
 
     def set_row_image(self, cat, value, filename):
-        pix = None
-        try:  # assume we could get trashed images here..
-            pix = GdkPixbuf.Pixbuf.new_from_file_at_size(filename, 16, 16)
-        except Exception as ex:
-            log.debug(ex)
-
-        if not pix:
-            pix = self.get_transparent_pix(16, 16)
+        pix = get_pixbuf_at_size(filename, 16)
         row = self.filters[(cat, value)]
         self.treestore.set_value(row, 4, pix)
         return False

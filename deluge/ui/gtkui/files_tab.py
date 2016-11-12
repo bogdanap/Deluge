@@ -13,7 +13,8 @@ import cPickle
 import logging
 import os.path
 
-from gi.repository import Gdk, Gtk
+from gi.repository import Gtk
+from gi.repository.Gdk import DragAction, ModifierType, keyval_name  # pylint: disable=ungrouped-imports
 from gi.repository.GObject import TYPE_UINT64
 
 import deluge.component as component
@@ -192,10 +193,10 @@ class FilesTab(Tab):
         self.listview.connect('button-press-event', self._on_button_press_event)
 
         self.listview.enable_model_drag_source(
-            Gdk.ModifierType.BUTTON1_MASK,
+            ModifierType.BUTTON1_MASK,
             [('text/plain', 0, 0)],
-            Gdk.DragAction.DEFAULT | Gdk.DragAction.MOVE)
-        self.listview.enable_model_drag_dest([('text/plain', 0, 0)], Gdk.DragAction.DEFAULT)
+            DragAction.DEFAULT | DragAction.MOVE)
+        self.listview.enable_model_drag_dest([('text/plain', 0, 0)], DragAction.DEFAULT)
 
         self.listview.connect('drag_data_get', self._on_drag_data_get_data)
         self.listview.connect('drag_data_received', self._on_drag_data_received_data)
@@ -501,7 +502,7 @@ class FilesTab(Tab):
             return True
 
     def _on_key_press_event(self, widget, event):
-        keyname = Gdk.keyval_name(event.keyval)
+        keyname = keyval_name(event.keyval)
         if keyname is not None:
             func = getattr(self, 'keypress_' + keyname.lower(), None)
             selected_rows = self.listview.get_selection().get_selected_rows()[1]
