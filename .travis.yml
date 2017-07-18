@@ -11,13 +11,15 @@ cache: pip
 
 before_install:
   - lsb_release -a
-  - sudo add-apt-repository ppa:deluge-team/develop -y
-  - sudo apt-get update
+  - sudo add-apt-repository ppa:deluge-team/develop -y -u
 
 # command to install dependencies
 install:
   - bash -c "echo $APTPACKAGES"
   - sudo apt-get install $APTPACKAGES
+  - python -c "import libtorrent as lt; print lt.__version__"
+  - which virtualenv
+  - virtualenv --version
   - pip install "tox==2.1.1"
 
 env:
@@ -41,8 +43,6 @@ virtualenv:
 
 # We use xvfb for the GTKUI tests
 before_script:
-  - python -c "import sys; print(sys.executable); print(sys.path)"
-  - ~/virtualenv/python2.7_with_system_site_packages/bin/python -c "import libtorrent as lt; print lt.__version__"
   - export PYTHONPATH=$PYTHONPATH:$PWD
   - python -c "import libtorrent as lt; print lt.__version__"
   - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16"
