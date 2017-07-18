@@ -18,9 +18,10 @@ before_install:
 install:
   - bash -c "echo $APTPACKAGES"
   - sudo apt-get install $APTPACKAGES
-  - python -c "import libtorrent as lt; print lt.__version__"
   - which virtualenv
   - virtualenv --version
+  - export PYTHONPATH=/usr/local/lib/python2.7/site-packages:$PYTHONPATH
+  - python -c "import libtorrent as lt; print lt.__version__"
   - pip install "tox==2.1.1"
 
 env:
