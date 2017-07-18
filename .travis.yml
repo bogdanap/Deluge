@@ -16,13 +16,14 @@ before_install:
 
 # command to install dependencies
 install:
-  - bash -c "echo $APTPACKAGES"
-  - sudo apt-get install $APTPACKAGES
   - which virtualenv
-  - virtualenv --version
-  - export PYTHONPATH=/usr/local/lib/python2.7/site-packages:$PYTHONPATH
+  - bash -c "echo $APTPACKAGES"
+  - sudo apt-get install -q $APTPACKAGES
+  - export PYTHONPATH=/usr/lib/python2.7/dist-packages/:$PYTHONPATH
+  - bash -c "echo $PYTHONPATH"
   - python -c "import libtorrent as lt; print lt.__version__"
   - pip install "tox==2.1.1"
+  - which virtualenv
 
 env:
   global:
