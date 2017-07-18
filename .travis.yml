@@ -11,7 +11,8 @@ cache: pip
 
 before_install:
   - lsb_release -a
-  - sudo add-apt-repository ppa:deluge-team/develop -y -u
+  - sudo add-apt-repository ppa:deluge-team/develop -y
+  - sudo apt-get update
 
 # command to install dependencies
 install:
