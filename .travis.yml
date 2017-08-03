@@ -27,14 +27,7 @@ env:
     - DISPLAY=:99.0
   matrix:
     - TOX_ENV=pydef
-    - TOX_ENV=flake8
-#    - TOX_ENV=flake8-complexity
-    - TOX_ENV=docs
-#    - TOX_ENV=todo
-    - TOX_ENV=trial              APTPACKAGES="$APTPACKAGES $APTPACKAGES_GTKUI"
-    - TOX_ENV=pygtkui            APTPACKAGES="$APTPACKAGES $APTPACKAGES_GTKUI"
-#    - TOX_ENV=testcoverage       APTPACKAGES="$APTPACKAGES $APTPACKAGES_GTKUI"
-    - TOX_ENV=plugins
+
 
 virtualenv:
   system_site_packages: true
