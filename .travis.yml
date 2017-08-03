@@ -6,7 +6,7 @@ language: python
 
 python:
     - "2.7"
-
+cache: pip
 
 before_install:
   - lsb_release -a
@@ -17,7 +17,7 @@ before_install:
 install:
   - bash -c "echo $APTPACKAGES"
   - sudo apt-get install $APTPACKAGES
-  - pip install "tox==2.1.1"
+
 
 env:
   global:
